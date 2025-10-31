@@ -31,7 +31,7 @@ class MachineController extends Controller
     //  List all machines
     public function index()
     {
-        $machines = Machine::where('is_deleted', 0)->get();
+        $machines = Machine::where('is_deleted', 0)->orderBy('id', 'desc')->get();
 
         return response()->json([
             'status' => true,

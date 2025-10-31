@@ -3,17 +3,20 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Machine;
+use App\Models\Operator;
+use App\Models\Process;
 use App\Models\WeeklyProduction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class WeeklyProductionController extends Controller
 {
-    // List all weekly production records (not deleted)
     public function index()
     {
         $data = WeeklyProduction::with(['operator', 'machine', 'process'])
             ->where('is_deleted', 0)
+            ->orderBy('id', 'desc')
             ->get();
 
         return response()->json(['status' => true, 'data' => $data]);
@@ -23,13 +26,47 @@ class WeeklyProductionController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'operator_id' => 'required|integer',
+            'operator_id' => 'required|integer|exists:operator,id',
             'week'        => 'required|string|max:255',
-            'machine_id'  => 'required|integer',
-            'process_id'  => 'required|integer',
+            'machine_id'  => 'required|integer|exists:machine,id',
+            'process_id'  => 'required|integer|exists:process,id',
             'qty'         => 'required|integer',
             'mnts_taken'  => 'required|numeric',
         ]);
+
+        // Check if operator exists and is not deleted
+        $operator = Operator::where('id', $request->operator_id)
+            ->where('is_deleted', 0)
+            ->first();
+
+        if (!$operator) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Operator not found or deleted.',
+            ], 404);
+        }
+
+        $machine = Machine::where('id', $request->machine_id)
+            ->where('is_deleted', 0)
+            ->first();
+
+        if (!$machine) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Machine not found or deleted.',
+            ], 404);
+        }
+        // Check if process exists and is not deleted
+        $process = Process::where('id', $request->process_id)
+            ->where('is_deleted', 0)
+            ->first();
+
+        if (!$process) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Process not found or deleted.',
+            ], 404);
+        }
 
         $data = WeeklyProduction::create([
             'operator_id' => $request->operator_id,
@@ -80,14 +117,79 @@ class WeeklyProductionController extends Controller
             return response()->json(['status' => false, 'message' => 'Record not found'], 404);
         }
 
+        // Validate basic fields
+        $request->validate([
+            'operator_id' => 'sometimes|integer|exists:operator,id',
+            'machine_id'  => 'sometimes|integer|exists:machine,id',
+            'process_id'  => 'sometimes|integer|exists:process,id',
+            'week'        => 'sometimes|string|max:255',
+            'qty'         => 'sometimes|integer',
+            'mnts_taken'  => 'sometimes|numeric',
+        ]);
+
+        if ($request->has('operator_id')) {
+            $operator = Operator::where('id', $request->operator_id)
+                ->where('is_deleted', 0)
+                ->first();
+
+            if (!$operator) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Operator not found or deleted.',
+                ], 404);
+            }
+        }
+
+        if ($request->has('machine_id')) {
+            $machine = Machine::where('id', $request->machine_id)
+                ->where('is_deleted', 0)
+                ->first();
+
+            if (!$machine) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Machine not found or deleted.',
+                ], 404);
+            }
+        }
+
+        if ($request->has('process_id')) {
+            $process = Process::where('id', $request->process_id)
+                ->where('is_deleted', 0)
+                ->first();
+
+            if (!$process) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Process not found or deleted.',
+                ], 404);
+            }
+        }
+
         $data->update($request->only([
-            'operator_id', 'week', 'machine_id', 'process_id',
-            'qty', 'mnts_taken', 'cnc_a', 'cnc_b', 'cnc_c', 'cnc_d', 'cnc_e', 'cnc_f',
-            'cnc_g', 'cnc_h', 'cnc_i', 'cnc_k', 'idle_time', 'total'
+            'operator_id',
+            'week',
+            'machine_id',
+            'process_id',
+            'qty',
+            'mnts_taken',
+            'cnc_a',
+            'cnc_b',
+            'cnc_c',
+            'cnc_d',
+            'cnc_e',
+            'cnc_f',
+            'cnc_g',
+            'cnc_h',
+            'cnc_i',
+            'cnc_k',
+            'idle_time',
+            'total'
         ]));
 
         return response()->json(['status' => true, 'message' => 'Record updated successfully', 'data' => $data]);
     }
+
 
     //  Soft delete record
     public function destroy($id)

@@ -31,7 +31,7 @@ class OperatorController extends Controller
     // Get all operators
     public function index()
     {
-        $operators = Operator::where('is_deleted', 0)->get();
+        $operators = Operator::where('is_deleted', 0)->orderBy('id', 'desc')->get();
 
         return response()->json([
             'status' => true,
