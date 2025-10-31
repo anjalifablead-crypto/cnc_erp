@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Process;
 use App\Models\ProcessCycle;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -12,7 +13,7 @@ class ProcessCycleController extends Controller
     // Show all active cycles
     public function index()
     {
-        $cycles = ProcessCycle::with('process')->where('is_deleted', 0)->get();
+        $cycles = ProcessCycle::with('process')->where('is_deleted', 0)->orderBy('id', 'desc')->get();
         return response()->json(['status' => true, 'data' => $cycles]);
     }
 
@@ -37,6 +38,17 @@ class ProcessCycleController extends Controller
             'cycle_mins'  => 'required|min:0',
         ]);
 
+        $process = Process::where('id', $request->process_id)
+            ->where('is_deleted', 0)
+            ->first();
+
+        if (!$process) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Process not found or deleted.',
+            ], 404);
+        }
+
         $cycle = ProcessCycle::create([
             'process_id'  => $request->process_id,
             'cycle_secs'  => $request->cycle_secs,
@@ -51,6 +63,7 @@ class ProcessCycleController extends Controller
     public function update(Request $request, $id)
     {
         $request->validate([
+            'process_id'  => 'sometimes|integer|exists:process,id',
             'cycle_secs'  => 'required|min:0',
             'cycle_mins'  => 'required|min:0',
         ]);
@@ -61,12 +74,26 @@ class ProcessCycleController extends Controller
             return response()->json(['status' => false, 'message' => 'Cycle not found'], 404);
         }
 
-        $cycle->update([
-            'cycle_secs' => $request->cycle_secs,
-            'cycle_mins' => $request->cycle_mins,
-        ]);
+        if ($request->has('process_id')) {
+            $process = Process::where('id', $request->process_id)
+                ->where('is_deleted', 0)
+                ->first();
 
-        return response()->json(['status' => true, 'message' => 'Process cycle updated successfully', 'data' => $cycle]);
+            if (!$process) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Process not found or deleted.',
+                ], 404);
+            }
+        }
+
+        $cycle->update($request->only(['process_id', 'cycle_secs', 'cycle_mins']));
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Process cycle updated successfully',
+            'data' => $cycle
+        ]);
     }
 
     // Soft delete

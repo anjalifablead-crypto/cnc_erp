@@ -12,7 +12,7 @@ class Attendance extends Model
      protected $table = 'attendance';
 
     protected $fillable = [
-        'mf_no',
+        'mf_id',
         'date_from',
         'date_to',
         'operator_id',

@@ -12,7 +12,7 @@ class ProcessController extends Controller
     // Show all processes
     public function index()
     {
-        $processes = Process::where('is_deleted', 0)->get();
+        $processes = Process::where('is_deleted', 0)->orderBy('id', 'desc')->get();
         return response()->json(['status' => true, 'data' => $processes]);
     }
 

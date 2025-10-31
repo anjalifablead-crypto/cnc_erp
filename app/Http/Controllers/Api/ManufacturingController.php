@@ -12,7 +12,7 @@ class ManufacturingController extends Controller
     // Show all manufacturing records (not deleted)
     public function index()
     {
-        $data = Manufacturing::where('is_deleted', 0)->get();
+        $data = Manufacturing::where('is_deleted', 0)->orderBy('id', 'desc')->get();
         return response()->json(['status' => true, 'data' => $data]);
     }
 
@@ -29,7 +29,7 @@ class ManufacturingController extends Controller
             'mf_no'     => $request->mf_no,
             'date_from' => $request->date_from,
             'date_to'   => $request->date_to,
-            'created_by'=> Auth::id(),
+            'created_by' => Auth::id(),
         ]);
 
         return response()->json(['status' => true, 'message' => 'Manufacturing record created successfully', 'data' => $data]);
