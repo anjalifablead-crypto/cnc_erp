@@ -16,7 +16,7 @@ class AuthController extends Controller
         $request->validate([
             'name'     => 'required|string|max:255',
             'email'    => 'required|string|email|unique:users',
-            'password' => 'required|string|min:6',
+            'password' => 'required|string|min:3',
         ]);
 
         $user = User::create([
@@ -27,7 +27,7 @@ class AuthController extends Controller
 
         $token = $user->createToken('PassportToken')->accessToken;
 
-        return response()->json(['token' => $token, 'user' => $user], 201);
+        return response()->json(['status' => true,'token' => $token, 'user' => $user], 201);
     }
 
     // Login

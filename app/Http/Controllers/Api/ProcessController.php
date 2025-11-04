@@ -20,7 +20,7 @@ class ProcessController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'process_name' => 'required|string|max:255',
+            'process_name' => 'required|string|max:255|unique:process,process_name',
         ]);
 
         $process = Process::create([
@@ -35,7 +35,7 @@ class ProcessController extends Controller
     public function update(Request $request, $id)
     {
         $request->validate([
-            'process_name' => 'required|string|max:255',
+            'process_name' => 'required|string|max:255|unique:process,process_name',
         ]);
 
         $process = Process::find($id);

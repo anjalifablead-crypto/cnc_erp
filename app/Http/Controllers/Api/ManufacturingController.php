@@ -20,7 +20,7 @@ class ManufacturingController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'mf_no'     => 'required|string|max:255',
+            'mf_no'     => 'required|string|max:255|unique:manufacturing,mf_no',
             'date_from' => 'required|date',
             'date_to'   => 'required|date|after_or_equal:date_from',
         ]);
@@ -57,7 +57,7 @@ class ManufacturingController extends Controller
         }
 
         $request->validate([
-            'mf_no'     => 'sometimes|required|string|max:255',
+            'mf_no'     => 'sometimes|required|string|max:255|unique:manufacturing,mf_no',
             'date_from' => 'sometimes|required|date',
             'date_to'   => 'sometimes|required|date|after_or_equal:date_from',
         ]);
