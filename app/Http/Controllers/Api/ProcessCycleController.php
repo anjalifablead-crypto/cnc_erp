@@ -89,7 +89,7 @@ class ProcessCycleController extends Controller
 
         $cycle->update($request->only(['process_id', 'cycle_secs', 'cycle_mins']));
 
-        
+
 
         return response()->json([
             'status' => true,
@@ -99,6 +99,8 @@ class ProcessCycleController extends Controller
     }
 
 
+
+    
     // Soft delete
     public function destroy($id)
     {
