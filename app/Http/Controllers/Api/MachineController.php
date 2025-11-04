@@ -13,7 +13,7 @@ class MachineController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'machine_number' => 'required|string|max:255',
+            'machine_number' => 'required|string|max:255|unique:machine,machine_number',
         ]);
 
         $machine = Machine::create([
@@ -58,10 +58,10 @@ class MachineController extends Controller
 
         if (!$machine || $machine->is_deleted) {
             return response()->json(['status' => false, 'error' => 'Machine not found'], 404);
-        }
+        } 
 
         $request->validate([
-            'machine_number' => 'required|string|max:255',
+            'machine_number' => 'required|string|max:255|unique:machine,machine_number',
         ]);
 
         $machine->update([

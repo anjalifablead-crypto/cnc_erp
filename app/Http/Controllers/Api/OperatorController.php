@@ -13,7 +13,7 @@ class OperatorController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'operator_name' => 'required|string|max:255',
+            'operator_name' => 'required|string|max:255|unique:operator,operator_name',
         ]);
 
         $operator = Operator::create([
@@ -61,7 +61,7 @@ class OperatorController extends Controller
         }
 
         $request->validate([
-            'operator_name' => 'required|string|max:255',
+            'operator_name' => 'required|string|max:255|unique:operator,operator_name',
         ]);
 
         $operator->update([
